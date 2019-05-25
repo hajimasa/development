@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   root to: 'home#top'
   get 'home/top'
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  get 'ajax/get_my_location_information_data'
+  post 'ajax/get_my_location_information_data'
 end
