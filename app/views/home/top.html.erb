@@ -2,11 +2,6 @@
 <button style='width: 200px; margin: 0 auto;' onclick="getPosition();">位置情報を取得する</button>
 <div id='map'></div>
 
-<br>近い順に10個<br>
-<% @distance_list.each do |distance| %>
-  <%= @results["#{distance[0]}"]%><br>
-<% end %>
-
 <style>
 #map{
   height: 400px;
@@ -41,13 +36,36 @@
     currentLocation.setPosition(position);
   }
 
+  function setEventInfo(events){
+    // TODO 取得したイベントデータのフォーマット要確認
+    console.log(events);
+    Object.keys(events).forEach(function(key) {
+      let event = events[key];
+      let eventLocation = new google.maps.Marker({
+        position: { lat: Number(event.lat), lng: Number(event.lon)},
+        map: map
+      });
 
+      let eventInfo = new google.maps.InfoWindow({
+        content: '<div class="sample">' + event.title + '</div>'
+      });
+
+      eventLocation.addListener('click', function() {
+        eventInfo.open(map, eventLocation);
+      });
+    });
+  }
 
   function getPosition() {
     // 現在地を取得
     navigator.geolocation.getCurrentPosition(
       // 取得成功した場合
       function(position) {
+        if(map === undefined){
+          initMap({ lat: position.coords.latitude, lng: position.coords.longitude});
+        } else {
+          moveMap({ lat: position.coords.latitude, lng: position.coords.longitude});
+        }
         console.log(position)
         if(map === undefined){
           initMap({ lat: position.coords.latitude, lng: position.coords.longitude});
@@ -63,6 +81,7 @@
           timeout:3000,
         }).done(function(data) {
           alert("ok");
+          setEventInfo(data);
         }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
           alert("error");
         })
