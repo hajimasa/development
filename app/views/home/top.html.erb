@@ -2,11 +2,6 @@
 <button onclick="getPosition();">位置情報を取得する</button>
 <div id='map'></div>
 
-<br>近い順に10個<br>
-<% @distance_list.each do |distance| %>
-  <%= @results["#{distance[0]}"]%><br>
-<% end %>
-
 <style>
 #map{
   height: 400px;
@@ -43,20 +38,22 @@
 
   function setEventInfo(events){
     // TODO 取得したイベントデータのフォーマット要確認
-    for (let event in events){
+    console.log(events);
+    Object.keys(events).forEach(function(key) {
+      let event = events[key];
       let eventLocation = new google.maps.Marker({
-        position: { lat: event.lata, lng: event.lng},
+        position: { lat: Number(event.lat), lng: Number(event.lon)},
         map: map
       });
 
       let eventInfo = new google.maps.InfoWindow({
-        content: '<div class="sample">event.title</div>'
+        content: '<div class="sample">' + event.title + '</div>'
       });
 
       eventLocation.addListener('click', function() {
         eventInfo.open(map, eventLocation);
       });
-    }
+    });
   }
 
   function getPosition() {
