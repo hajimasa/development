@@ -1,6 +1,7 @@
 class AjaxController < ApplicationController
   require 'net/http'
   def get_my_location_information_data
+
     today = Date.today.strftime("%Y%m%d")
     tommorow = (Date.today + 1).strftime("%Y%m%d")
 
@@ -8,24 +9,29 @@ class AjaxController < ApplicationController
     @atnd_results = get_atnd_events_data(today)
     @doorkeeper_results = get_doorkeeper_events_data(tommorow)
 
-    @results = {}
+    @tmp_results = {}
+    @results = []
     @distance_list = []
 
     @connpass_results.each_with_index do |result, i|
       id = "c#{i}"
       distance = distance(params[:coords][:latitude], params[:coords][:longitude], result["lat"], result["lon"]).round(2)
-      @results["#{id}"] = { event_url: result["event_url"], title: result["title"], started_at: result["started_at"], lat: result["lat"], lon: result["lon"] }
+      @tmp_results["#{id}"] = { event_url: result["event_url"], title: result["title"], started_at: result["started_at"], lat: result["lat"], lon: result["lon"] }
       @distance_list <<[id, distance]
     end
 
     @atnd_results.each_with_index do |result, i|
       id = "a#{i}"
       distance = distance(params[:coords][:latitude], params[:coords][:longitude], result["event"]["lat"], result["event"]["lon"]).round(2)
-      @results["#{id}"] = { event_url: result["event"]["event_url"], title: result["event"]["title"], started_at: result["event"]["started_at"], lat: result["event"]["lat"], lon: result["event"]["lon"] }
+      @tmp_results["#{id}"] = { event_url: result["event"]["event_url"], title: result["event"]["title"], started_at: result["event"]["started_at"], lat: result["event"]["lat"], lon: result["event"]["lon"] }
       @distance_list <<[id, distance]
     end
 
     @distance_list = @distance_list.sort_by(&:last).take(10)
+
+    @distance_list.each do |i|
+      @results << @tmp_results["#{i[0]}"]
+    end
 
     render json: @results, status: 200
   end
